@@ -36,13 +36,12 @@ case `uname` in
     }
     ;;
   *)
-    echo "Unknown OS!"
+    echo ">> Unknown OS!"
     exit 1
     ;;
 esac
 
 if [ -n "$1" ] ; then
-
   echo ">> Creating $TEMP_DIR folder and cd"
   mkdir -p $TEMP_DIR
   cd $TEMP_DIR

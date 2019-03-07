@@ -1,5 +1,10 @@
 #! /bin/bash
 
+# This script is a helper to get the
+# exact file_name and md5 given a version.
+# It supports Linux and Darwin amd64.
+# Usage: ./search 1.8.23
+
 case `uname` in
   'Linux')
     prefix=geth-linux-amd64-$1
@@ -8,7 +13,7 @@ case `uname` in
     prefix=geth-darwin-amd64-$1
     ;;
   *)
-    echo "Unknown OS!"
+    echo ">> Unknown OS!"
     exit 1
     ;;
 esac

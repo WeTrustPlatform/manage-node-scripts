@@ -8,31 +8,40 @@
 # ./download-geth.sh 1.8.23
 #
 
-GPG_KEY="0xA61A13569BA28146"
-GPG_FINGERPRINT="FDE5 A1A0 44FA 13D2 F7AD  A019 A61A 1356 9BA2 8146"
+GPG_KEY_LINUX="0xA61A13569BA28146"
+GPG_FINGERPRINT_LINUX="FDE5 A1A0 44FA 13D2 F7AD  A019 A61A 1356 9BA2 8146"
+
+GPG_KEY_DARWIN="0x558915E17B9E2481"
+GPG_FINGERPRINT_DARWIN="6D1D AF5D 0534 DEA6 1AA7  7AD5 5589 15E1 7B9E 2481"
+
 TEMP_DIR=tmp
 DOWNLOAD_PATH=https://gethstore.blob.core.windows.net/builds
 
 # no-verbose no-clobber
 WGET="wget -nc -nv"
 
-check_md5 () {
-  OS="`uname`"
-  case $OS in
-    'Linux')
+case `uname` in
+  'Linux')
+    GPG_KEY=$GPG_KEY_LINUX
+    GPG_FINGERPRINT=$GPG_FINGERPRINT_LINUX
+    check_md5 () {
       md5sum --quiet -c $1.md5 || exit 1
-      ;;
-    'Darwin')
+    }
+    ;;
+  'Darwin')
+    GPG_KEY=$GPG_KEY_DARWIN
+    GPG_FINGERPRINT=$GPG_FINGERPRINT_DARWIN
+    check_md5 () {
       md5 -r $1 | diff $1.md5 - || exit 1
-      ;;
-    *)
-      echo "Unknown OS!"
-      exit 1
-      ;;
-  esac
-}
+    }
+    ;;
+  *)
+    echo "Unknown OS!"
+    exit 1
+    ;;
+esac
 
-if [ -n "$1" ]; then
+if [ -n "$1" ] ; then
 
   echo ">> Creating $TEMP_DIR folder and cd"
   mkdir -p $TEMP_DIR

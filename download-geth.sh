@@ -5,7 +5,7 @@
 # and untar it in the `tmp` folder
 # under the same directory.
 # Usage:
-# ./download-geth.sh <geth-linux-amd64-1.8.22-7fa3509e.tar.gz> <md5sum>
+# ./download-geth.sh 1.8.23
 #
 
 GPG_KEY="0xA61A13569BA28146"
@@ -17,26 +17,27 @@ DOWNLOAD_PATH=https://gethstore.blob.core.windows.net/builds
 WGET="wget -nc -nv"
 
 if [ -n "$1" ]; then
-  if [ -z "$2" ]; then
-    echo "Missing MD5 checksum!"
-    exit 1
-  fi
 
   echo ">> Creating $TEMP_DIR folder and cd"
   mkdir -p $TEMP_DIR
   cd $TEMP_DIR
 
-  echo ">> Downloading binary $1"
-  $WGET $DOWNLOAD_PATH/$1
+  # this script set values of file_name and md5_value
+  source ../search.sh
+
+  echo ">> Downloading binary $file_name"
+  $WGET $DOWNLOAD_PATH/$file_name
 
   echo ">> Verifying MD5 checksum"
-  echo "$2 $1" > $1.md5
-  md5sum --quiet -c $1.md5 || exit 1
+  echo "$md5_value $file_name" > $file_name.md5
+  # Linux
+  # md5sum --quiet -c $file_name.md5 || exit 1"
+  md5 -r $file_name | diff $file_name.md5 - || exit 1
 
   echo ">> Checksum verified"
 
-  echo ">> Downloading signature $1.asc"
-  $WGET $DOWNLOAD_PATH/$1.asc
+  echo ">> Downloading signature $file_name.asc"
+  $WGET $DOWNLOAD_PATH/$file_name.asc
 
   echo ">> Check if public key has been imported"
   gpg --list-key $GPG_KEY
@@ -47,7 +48,7 @@ if [ -n "$1" ]; then
 
   echo ">> Verifying GPG signature"
   # 2>&1 because of the unknown signature warning
-  gpg --verify $1.asc 2>&1 | grep "$GPG_FINGERPRINT"
+  gpg --verify $file_name.asc 2>&1 | grep "$GPG_FINGERPRINT"
   if [ $? -ne 0 ]; then
     echo ">> Error: Fingerprint does not match!"
     exit 1
@@ -55,10 +56,10 @@ if [ -n "$1" ]; then
   echo ">> GPG signature verified"
 
   echo ">> Unpacking tar"
-  tar xvf $1
+  tar xvf $file_name
   echo ">> Done!"
   exit 0
 else
-  echo ">> Missing file name! i.e. geth-linux-amd64-1.8.22-7fa3509e.tar.gz"
+  echo ">> Please specify version! i.e. 1.8.22"
   exit 1
 fi

@@ -16,6 +16,22 @@ DOWNLOAD_PATH=https://gethstore.blob.core.windows.net/builds
 # no-verbose no-clobber
 WGET="wget -nc -nv"
 
+check_md5 () {
+  OS="`uname`"
+  case $OS in
+    'Linux')
+      md5sum --quiet -c $1.md5 || exit 1
+      ;;
+    'Darwin')
+      md5 -r $1 | diff $1.md5 - || exit 1
+      ;;
+    *)
+      echo "Unknown OS!"
+      exit 1
+      ;;
+  esac
+}
+
 if [ -n "$1" ]; then
 
   echo ">> Creating $TEMP_DIR folder and cd"
@@ -30,10 +46,7 @@ if [ -n "$1" ]; then
 
   echo ">> Verifying MD5 checksum"
   echo "$md5_value $file_name" > $file_name.md5
-  # Linux
-  # md5sum --quiet -c $file_name.md5 || exit 1"
-  md5 -r $file_name | diff $file_name.md5 - || exit 1
-
+  check_md5 $file_name
   echo ">> Checksum verified"
 
   echo ">> Downloading signature $file_name.asc"

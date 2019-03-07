@@ -11,7 +11,7 @@ read_dom () {
 
 parse_dom () {
   if [[ $ENTITY = "Content-MD5" ]] ; then
-    md5_value=$(echo -n $CONTENT | base64 -D | xxd -p)
+    md5_value=$(echo -n $CONTENT | base64 --decode | xxd -p)
   fi
 
   if [[ $ENTITY = "Name" ]] ; then

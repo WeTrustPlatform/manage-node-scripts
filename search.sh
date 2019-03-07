@@ -1,6 +1,19 @@
 #! /bin/bash
 
-SEARCH_QUERY=https://gethstore.blob.core.windows.net/builds\?restype\=container\&comp\=list\&maxresults\=1\&prefix\=geth-linux-amd64-$1
+case `uname` in
+  'Linux')
+    prefix=geth-linux-amd64-$1
+    ;;
+  'Darwin')
+    prefix=geth-darwin-amd64-$1
+    ;;
+  *)
+    echo "Unknown OS!"
+    exit 1
+    ;;
+esac
+
+SEARCH_QUERY=https://gethstore.blob.core.windows.net/builds\?restype\=container\&comp\=list\&maxresults\=1\&prefix\=$prefix
 
 echo $SEARCH_QUERY
 
@@ -34,4 +47,10 @@ get_file_name_and_md5 () {
 
 # assume file_name and md5_content content no spaces
 read file_name md5_value < <(get_file_name_and_md5)
+
+if [ -z "$file_name" ] ; then
+  echo ">> Cannot find $prefix"
+  exit 1
+fi
+
 echo $file_name $md5_value

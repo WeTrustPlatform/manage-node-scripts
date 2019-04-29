@@ -4,8 +4,8 @@ A collection of scripts to manage Ethereum nodes
 ### Download geth
 ```
 ./dowload-geth 1.8.23
-# The downloaded binary is in ./tmp
-sudo cp tmp/<package-name>/geth /usr/bin/
+# The downloaded binary is in ./geth-1.8.23
+sudo cp geth-1.8.23/geth /usr/bin/
 ```
 
 Why do I need this script?

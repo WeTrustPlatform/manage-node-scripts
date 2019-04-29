@@ -1,9 +1,8 @@
 #! /bin/bash
 
 # This script downloads the Geth binary,
-# verify MD5 checksum, gpg signature
-# and untar it in the `tmp` folder
-# under the same directory.
+# verify MD5 checksum, gpg signature.
+# The final geth binary is in the `./geth-<version>` folder
 # Usage:
 # ./download-geth.sh 1.8.23
 #
@@ -78,7 +77,8 @@ if [ -n "$1" ] ; then
 
   echo ">> Unpacking tar"
   tar xvf $file_name
-  echo ">> Done!"
+  mv $(basename $file_name .tar.gz) ../geth-$1
+  echo ">> Done! The geth binary is in ../geth-$1/.  Please feel free to remove ./tmp"
   exit 0
 else
   echo ">> Please specify version! i.e. 1.8.22"

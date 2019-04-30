@@ -4,7 +4,8 @@
 # verify MD5 checksum, gpg signature.
 # The final geth binary is in the `./geth-<version>` folder
 # Usage:
-# ./download-geth.sh 1.8.23
+# ./download-geth.sh [1.8.23]
+# If no geth version specified, it will download the latest
 #
 
 GPG_KEY_LINUX="0xA61A13569BA28146"
@@ -18,6 +19,9 @@ DOWNLOAD_PATH=https://gethstore.blob.core.windows.net/builds
 
 # no-verbose no-clobber
 WGET="wget -nc -nv"
+
+# this script set values of version, file_name and md5_value
+source ./search.sh
 
 case `uname` in
   'Linux')
@@ -40,47 +44,41 @@ case `uname` in
     ;;
 esac
 
-if [ -n "$1" ] ; then
-  echo ">> Creating $TEMP_DIR folder and cd"
-  mkdir -p $TEMP_DIR
-  cd $TEMP_DIR
+echo ">> Creating $TEMP_DIR folder and cd"
+mkdir -p $TEMP_DIR
+cd $TEMP_DIR
 
-  # this script set values of file_name and md5_value
-  source ../search.sh
+echo ">> Downloading binary $file_name"
+$WGET $DOWNLOAD_PATH/$file_name
 
-  echo ">> Downloading binary $file_name"
-  $WGET $DOWNLOAD_PATH/$file_name
+echo ">> Verifying MD5 checksum"
+echo "$md5_value $file_name" > $file_name.md5
+check_md5 $file_name
+echo ">> Checksum verified"
 
-  echo ">> Verifying MD5 checksum"
-  echo "$md5_value $file_name" > $file_name.md5
-  check_md5 $file_name
-  echo ">> Checksum verified"
+echo ">> Downloading signature $file_name.asc"
+$WGET $DOWNLOAD_PATH/$file_name.asc
 
-  echo ">> Downloading signature $file_name.asc"
-  $WGET $DOWNLOAD_PATH/$file_name.asc
+echo ">> Check if public key has been imported"
+gpg --list-key $GPG_KEY
+if [ $? -ne 0 ]; then
+  echo ">> Getting key $GPG_KEY"
+  gpg --keyserver keyserver.ubuntu.com --recv $GPG_KEY
+fi
 
-  echo ">> Check if public key has been imported"
-  gpg --list-key $GPG_KEY
-  if [ $? -ne 0 ]; then
-    echo ">> Getting key $GPG_KEY"
-    gpg --keyserver keyserver.ubuntu.com --recv $GPG_KEY
-  fi
-
-  echo ">> Verifying GPG signature"
-  # 2>&1 because of the unknown signature warning
-  gpg --verify $file_name.asc 2>&1 | grep "$GPG_FINGERPRINT"
-  if [ $? -ne 0 ]; then
-    echo ">> Error: Fingerprint does not match!"
-    exit 1
-  fi
-  echo ">> GPG signature verified"
-
-  echo ">> Unpacking tar"
-  tar xvf $file_name
-  mv $(basename $file_name .tar.gz) ../geth-$1
-  echo ">> Done! The geth binary is in ../geth-$1/.  Please feel free to remove ./tmp"
-  exit 0
-else
-  echo ">> Please specify version! i.e. 1.8.22"
+echo ">> Verifying GPG signature"
+# 2>&1 because of the unknown signature warning
+gpg --verify $file_name.asc 2>&1 | grep "$GPG_FINGERPRINT"
+if [ $? -ne 0 ]; then
+  echo ">> Error: Fingerprint does not match!"
   exit 1
 fi
+echo ">> GPG signature verified"
+
+echo ">> Unpacking tar"
+tar xvf $file_name
+mv $(basename $file_name .tar.gz)/geth ../
+rm -r $(basename $file_name .tar.gz)
+echo ">> Done! Please feel free to remove ./tmp"
+echo ">> Please manually sudo cp geth /usr/local/bin/"
+exit 0

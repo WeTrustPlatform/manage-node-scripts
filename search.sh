@@ -5,12 +5,19 @@
 # It supports Linux and Darwin amd64.
 # Usage: ./search 1.8.23
 
+
+version=$1
+if [ -z "$1" ] ; then
+  version=$(curl -s https://api.github.com/repos/ethereum/go-ethereum/releases/latest | grep tag_name |  sed 's/.*"v\(.*\)".*/\1/')
+  echo ">> No version specified. Use the latest $version"
+fi
+
 case `uname` in
   'Linux')
-    prefix=geth-linux-amd64-$1
+    prefix=geth-linux-amd64-$version
     ;;
   'Darwin')
-    prefix=geth-darwin-amd64-$1
+    prefix=geth-darwin-amd64-$version
     ;;
   *)
     echo ">> Unknown OS!"

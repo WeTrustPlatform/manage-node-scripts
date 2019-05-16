@@ -12,4 +12,4 @@ Why do I need this script?
 - It verifies MD5 checksums.
 - It verifies GPG signatures.
 - It unzips for you.
-- Only thing you need to do is specify the version.
+- Only thing you need to do is executing `./download-geth`
